@@ -9,8 +9,8 @@ namespace SalesWebMvc.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
-        public double BaseSalary { get; set; }
         public DateTime BirthDate { get; set; }
+        public double BaseSalary { get; set; }
         // Implementing association between Seller (N) and Departament (1)
         public Departament Departament { get; set; }
         // Implementing association between Seller (1) and SalesRecord (N)

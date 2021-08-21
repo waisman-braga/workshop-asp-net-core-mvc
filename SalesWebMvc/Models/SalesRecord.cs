@@ -6,8 +6,8 @@ namespace SalesWebMvc.Models
     public class SalesRecord
     {
         public int Id { get; set; }
-        public double Amount { get; set; }
         public DateTime Date { get; set; }
+        public double Amount { get; set; }
         // Enum
         public SaleStatus Status { get; set; }
         // Implementing association between SalesRecord (N) and Seller (1)
@@ -16,13 +16,14 @@ namespace SalesWebMvc.Models
         // Constructors default and with arguments
         public SalesRecord() { }
 
-        public SalesRecord(int id, double amount, DateTime date, SaleStatus status, Seller seller)
+        public SalesRecord(int id, DateTime date, double amount, SaleStatus status, Seller seller)
         {
             Id = id;
-            Amount = amount;
             Date = date;
+            Amount = amount;
             Status = status;
             Seller = seller;
-        }
+        }        
+
     }
 }
