@@ -13,6 +13,7 @@ namespace SalesWebMvc.Models
         public double BaseSalary { get; set; }
         // Implementing association between Seller (N) and Departament (1)
         public Departament Departament { get; set; }
+        public int DepartamentId { get; set; }
         // Implementing association between Seller (1) and SalesRecord (N)
         public ICollection<SalesRecord> SalesRecord { get; set; } = new List<SalesRecord>();
 

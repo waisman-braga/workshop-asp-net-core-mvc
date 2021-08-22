@@ -27,6 +27,7 @@ namespace SalesWebMvc.Services
         // method to insert a new seller into the db
         public void Insert(Seller obj)
         {
+            obj.Departament = _context.Departament.First();
             _context.Add(obj);
             _context.SaveChanges();
         }
