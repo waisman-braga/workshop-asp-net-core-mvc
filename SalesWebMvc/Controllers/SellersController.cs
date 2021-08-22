@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SalesWebMvc.Models;
+using SalesWebMvc.Models.ViewModels;
 using SalesWebMvc.Services;
 using System;
 using System.Collections.Generic;
@@ -10,13 +11,15 @@ namespace SalesWebMvc.Controllers
 {
     public class SellersController : Controller
     {
-        // dependece for SellerService
+        // dependece for SellerService and DepartamentService
         private readonly SellerService _sellerService;
+        private readonly DepartamentService _departamentService;
 
         // construct to inject depencency
-        public SellersController(SellerService sellerService)
+        public SellersController(SellerService sellerService, DepartamentService departamentService)
         {
              _sellerService = sellerService;
+            _departamentService = departamentService;
         }
 
         public IActionResult Index()
@@ -31,8 +34,12 @@ namespace SalesWebMvc.Controllers
         // implementing create GET action
         public IActionResult Create()
         {
-            // return view Name create in seller folder
-            return View();
+            // getting all the departaments
+            var departaments = _departamentService.FindAll();
+            // instancing the view model
+            var viewModel = new SellerFormViewModel { Departaments = departaments };
+            // return view Name create in seller folder and the obj viewModel with all departaments populated 
+            return View(viewModel);
         }
 
         // implementing create POST action
