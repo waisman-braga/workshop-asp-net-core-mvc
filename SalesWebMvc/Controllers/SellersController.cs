@@ -55,6 +55,37 @@ namespace SalesWebMvc.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // implementing delete action to open a window where the user can confirm or not
+        public IActionResult Delete(int? id)
+        {
+            // validate if the id is null, if its null means the request was improper so we return null
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            // getting the obj we want to delete
+            // we need to put id.value bc the id is optional
+            var obj = _sellerService.FindById(id.Value);
+
+            // if the id is null return not found
+            if(obj == null)
+            {
+                return NotFound();
+            }
+
+            // if everything is right we return the view with the obj as an argument
+            return View(obj);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(int id)
+        {
+            _sellerService.Remove(id);
+            return RedirectToAction(nameof(Index));
+        }
+
 
     }
 }
