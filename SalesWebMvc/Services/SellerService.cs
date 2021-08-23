@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using SalesWebMvc.Services.Exceptions;
 
 namespace SalesWebMvc.Services
 {
@@ -46,6 +47,31 @@ namespace SalesWebMvc.Services
             _context.SaveChanges();
         }
 
+        // method to update a seller from the db
+        public void Update(Seller obj)
+        {
+            // validate if theres this id on db
+            if (!_context.Seller.Any(x => x.Id == obj.Id))
+            {
+                throw new NotFoundException("Id not found - SellerService");
+            }
 
+            try
+            {
+                _context.Update(obj);
+                _context.SaveChanges();
+            }
+            catch(DbConcurrencyException e)
+            {
+                // service exception to get the message from the db 
+                // Intercepting an access db exception and lauching this exception using my service level exception Services/Exceptions/DbConcurrencyException
+                // My service won't proprague an exception from a data base acess
+                // if an access db exception happen my service will throw an exception from its own service not from the db
+                // SellersController will only throw exceptions from the service leve 
+                // Data base exceptions are captured from the service and throw to the controller
+                throw new DbConcurrencyException(e.Message);
+            }
+
+        }
     }
 }

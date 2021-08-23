@@ -2,6 +2,7 @@
 using SalesWebMvc.Models;
 using SalesWebMvc.Models.ViewModels;
 using SalesWebMvc.Services;
+using SalesWebMvc.Services.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -110,7 +111,60 @@ namespace SalesWebMvc.Controllers
             return View(obj);
         }
 
+        // implementing edit action to open a window where the user can edit or go back to the seller index pg
+        public IActionResult Edit(int? id)
+        {
+            // validate if the id is null, if its null means the request was improper so we return not found
+            if (id == null)
+            {
+                return NotFound();
+            }
 
+            // getting the obj we want to delete
+            // we need to put id.value bc the id is optional
+            // validate into the db if theres an obj with the id
+            var obj = _sellerService.FindById(id.Value);
+
+            // if the obj is null return not found
+            if (obj == null)
+            {
+                return NotFound();
+            }
+
+            // openning the edit view 
+            // getting the departaments to populate the select box
+            // instacing the view model
+            List<Departament> departaments = _departamentService.FindAll();
+            SellerFormViewModel viewModel = new SellerFormViewModel { Seller = obj, Departaments = departaments };
+
+            return View(viewModel);
+        }
+
+        // implementing edit POST action
+        [HttpPost, ActionName("Edit")]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, Seller seller)
+        {
+            if(id != seller.Id)
+            {
+                return BadRequest();
+            }
+
+            // this method can throw exceptions 
+            try
+            {
+                _sellerService.Update(seller);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (NotFoundException)
+            {
+                return NotFound();
+            }
+            catch
+            {
+                return BadRequest();
+            }
+        }
 
 
     }
