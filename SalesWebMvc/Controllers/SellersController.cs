@@ -5,6 +5,7 @@ using SalesWebMvc.Services;
 using SalesWebMvc.Services.Exceptions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -62,7 +63,7 @@ namespace SalesWebMvc.Controllers
             // validate if the id is null, if its null means the request was improper so we return null
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id not provided." });
             }
 
             // getting the obj we want to delete
@@ -72,7 +73,7 @@ namespace SalesWebMvc.Controllers
             // if the id is null return not found
             if(obj == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id not found." });
             }
 
             // if everything is right we return the view with the obj as an argument
@@ -94,7 +95,7 @@ namespace SalesWebMvc.Controllers
             // validate if the id is null, if its null means the request was improper so we return null
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id not provided." });
             }
 
             // getting the obj we want to see its details
@@ -104,7 +105,7 @@ namespace SalesWebMvc.Controllers
             // if the id is null return not found
             if (obj == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id not found." });
             }
 
             // if everything is right we return the view with the obj as an argument
@@ -117,7 +118,7 @@ namespace SalesWebMvc.Controllers
             // validate if the id is null, if its null means the request was improper so we return not found
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id not provided." });
             }
 
             // getting the obj we want to delete
@@ -128,7 +129,7 @@ namespace SalesWebMvc.Controllers
             // if the obj is null return not found
             if (obj == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id not found." });
             }
 
             // openning the edit view 
@@ -147,7 +148,7 @@ namespace SalesWebMvc.Controllers
         {
             if(id != seller.Id)
             {
-                return BadRequest();
+                return RedirectToAction(nameof(Error), new { message = "Id mismatch" });
             }
 
             // this method can throw exceptions 
@@ -156,14 +157,24 @@ namespace SalesWebMvc.Controllers
                 _sellerService.Update(seller);
                 return RedirectToAction(nameof(Index));
             }
-            catch (NotFoundException)
+            catch (ApplicationException e) // ApplicationException abranges DbConcurrencyException and NotFoundException
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = e.Message });
             }
-            catch
+        }
+
+        // implementing error action to return view error.cshtml
+        public IActionResult Error(string message)
+        {
+            // Instancing view model with the message and the requestId
+            var viewModel = new ErrorViewModel
             {
-                return BadRequest();
-            }
+                Message = message,
+                // getting the internal ID from the request
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            };
+
+            return View(viewModel);
         }
 
 
