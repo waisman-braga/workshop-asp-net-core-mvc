@@ -58,6 +58,8 @@ namespace SalesWebMvc.Services
 
             try
             {
+                // when call the Update operation the db may return a concurrency conflict exception 
+                // if that exception happen the entity framework will send a DbConcurrencyException we need to put a try and catch to capture that expection
                 _context.Update(obj);
                 _context.SaveChanges();
             }
@@ -65,7 +67,7 @@ namespace SalesWebMvc.Services
             {
                 // service exception to get the message from the db 
                 // Intercepting an access db exception and lauching this exception using my service level exception Services/Exceptions/DbConcurrencyException
-                // My service won't proprague an exception from a data base acess
+                // my service won't proprague an exception from a data base acess
                 // if an access db exception happen my service will throw an exception from its own service not from the db
                 // SellersController will only throw exceptions from the service leve 
                 // Data base exceptions are captured from the service and throw to the controller
