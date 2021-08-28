@@ -42,9 +42,16 @@ namespace SalesWebMvc.Services
         // method to remove a seller from the db
         public async Task RemoveAsync(int id)
         {
-            var obj = await _context.Seller.FindAsync(id);
-            _context.Seller.Remove(obj);
-            await _context.SaveChangesAsync();
+            try
+            {
+                var obj = await _context.Seller.FindAsync(id);
+                _context.Seller.Remove(obj);
+                await _context.SaveChangesAsync();
+            }
+            catch(DbUpdateException e)
+            {
+                throw new IntegratyException("Can't delete seller because he/she has sales");
+            }
         }
 
         // method to update a seller from the db
