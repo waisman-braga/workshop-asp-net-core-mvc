@@ -24,20 +24,20 @@ namespace SalesWebMvc.Controllers
             _departamentService = departamentService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             // controller (SellersController) accessed the model (SellerService) to get data from list and send the data to the view (Seller/View/Index)
             // implementing Index method, which call SellerService.FindAll
             // return list of sellers and sending them to view
-            var list = _sellerService.FindAll();
+            var list = await _sellerService.FindAllAsync();
             return View(list);
         }
 
         // implementing create GET action
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             // getting all the departaments
-            var departaments = _departamentService.FindAll();
+            var departaments = await _departamentService.FindAllAsync();
             // instancing the view model
             var viewModel = new SellerFormViewModel { Departaments = departaments };
             // return view Name create in seller folder and the obj viewModel with all departaments populated 
@@ -49,20 +49,24 @@ namespace SalesWebMvc.Controllers
         // the entity framework instances the seller obj
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Seller seller)
+        public async Task<IActionResult> Create(Seller seller)
         {
+            // validation if its not validated return the view model with all the inputs required and messages 
+            // makes validation work even when javascript is unable
             if (!ModelState.IsValid)
             {
-                return View(seller);
+                var departaments = await _departamentService.FindAllAsync();
+                var viewModel = new SellerFormViewModel { Seller = seller, Departaments = departaments };
+                return View(viewModel);
             }
             // action to insert the obj into the db
-            _sellerService.Insert(seller);
+            await _sellerService.InsertAsync(seller);
             // redirect to the seller index page
             return RedirectToAction(nameof(Index));
         }
 
         // implementing delete action to open a window where the user can delete or go back to the seller index pg
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             // validate if the id is null, if its null means the request was improper so we return null
             if (id == null)
@@ -72,7 +76,7 @@ namespace SalesWebMvc.Controllers
 
             // getting the obj we want to delete
             // we need to put id.value bc the id is optional
-            var obj = _sellerService.FindById(id.Value);
+            var obj = await _sellerService.FindByIdAsync(id.Value);
 
             // if the id is null return not found
             if(obj == null)
@@ -87,14 +91,14 @@ namespace SalesWebMvc.Controllers
         // implementing delete POST action
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            _sellerService.Remove(id);
+            await _sellerService.RemoveAsync(id);
             return RedirectToAction(nameof(Index));
         }
 
         // implementing details action 
-        public IActionResult Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
             // validate if the id is null, if its null means the request was improper so we return null
             if (id == null)
@@ -104,7 +108,7 @@ namespace SalesWebMvc.Controllers
 
             // getting the obj we want to see its details
             // we need to put id.value bc the id is optional
-            var obj = _sellerService.FindById(id.Value);
+            var obj = await _sellerService.FindByIdAsync(id.Value);
 
             // if the id is null return not found
             if (obj == null)
@@ -117,7 +121,7 @@ namespace SalesWebMvc.Controllers
         }
 
         // implementing edit action to open a window where the user can edit or go back to the seller index pg
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             // validate if the id is null, if its null means the request was improper so we return not found
             if (id == null)
@@ -128,7 +132,7 @@ namespace SalesWebMvc.Controllers
             // getting the obj we want to delete
             // we need to put id.value bc the id is optional
             // validate into the db if theres an obj with the id
-            var obj = _sellerService.FindById(id.Value);
+            var obj = await _sellerService.FindByIdAsync(id.Value);
 
             // if the obj is null return not found
             if (obj == null)
@@ -139,7 +143,7 @@ namespace SalesWebMvc.Controllers
             // openning the edit view 
             // getting the departaments to populate the select box
             // instacing the view model
-            List<Departament> departaments = _departamentService.FindAll();
+            List<Departament> departaments = await _departamentService.FindAllAsync();
             SellerFormViewModel viewModel = new SellerFormViewModel { Seller = obj, Departaments = departaments };
 
             return View(viewModel);
@@ -148,13 +152,13 @@ namespace SalesWebMvc.Controllers
         // implementing edit POST action
         [HttpPost, ActionName("Edit")]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, Seller seller)
+        public async Task<IActionResult> Edit(int id, Seller seller)
         {
             // validation if its not validated return the view model with all the inputs required and messages 
             // makes validation work even when javascript is unable
             if (!ModelState.IsValid)
             {
-                var departaments = _departamentService.FindAll();
+                var departaments = await _departamentService.FindAllAsync();
                 var viewModel = new SellerFormViewModel { Seller = seller, Departaments = departaments };
                 return View(viewModel);
             }
@@ -167,7 +171,7 @@ namespace SalesWebMvc.Controllers
             // this method can throw exceptions 
             try
             {
-                _sellerService.Update(seller);
+                await _sellerService.UpdateAsync(seller);
                 return RedirectToAction(nameof(Index));
             }
             catch (ApplicationException e) // ApplicationException abranges DbConcurrencyException and NotFoundException

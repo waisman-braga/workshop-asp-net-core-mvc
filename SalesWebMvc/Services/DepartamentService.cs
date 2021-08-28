@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace SalesWebMvc.Services
 {
@@ -17,11 +18,14 @@ namespace SalesWebMvc.Services
             _context = context;
         }
 
-        // implementing operation findAll to return all departaments from db
-        public List<Departament> FindAll()
+        // implementing operation findAllAsync to return all departaments from db
+        public async Task<List<Departament>> FindAllAsync()
         {
             // get all departaments from db, order by name and convert to list (operation sync)
-            return _context.Departament.OrderBy(x => x.Name).ToList();
+            // the linq prepares the consult on db
+            // await tells the compiler that its an async call
+            // this execution wont block the aplication 
+            return await _context.Departament.OrderBy(x => x.Name).ToListAsync();
         }
 
 
