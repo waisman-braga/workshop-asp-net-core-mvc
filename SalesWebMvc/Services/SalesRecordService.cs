@@ -18,6 +18,13 @@ namespace SalesWebMvc.Services
             _context = context;
         }
 
+        // method to insert a new sale into the db
+        public async Task InsertAsync(SalesRecord obj)
+        {
+            _context.Add(obj);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<List<SalesRecord>> FindByDateAsync(DateTime? minDate, DateTime? maxDate)
         {
             var result = from obj in _context.SalesRecord select obj;

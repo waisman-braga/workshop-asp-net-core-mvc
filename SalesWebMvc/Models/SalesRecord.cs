@@ -16,11 +16,17 @@ namespace SalesWebMvc.Models
 
         // Enum
         public SaleStatus Status { get; set; }
+
         // Implementing association between SalesRecord (N) and Seller (1)
         public Seller Seller { get; set; }
 
         // Constructors default and with arguments
         public SalesRecord() { }
+
+        // departament id is already required bc of type int
+        [Display(Name = "Seller")]
+        public int SellerId { get; set; }
+
 
         public SalesRecord(int id, DateTime date, double amount, SaleStatus status, Seller seller)
         {
