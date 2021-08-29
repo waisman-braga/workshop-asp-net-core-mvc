@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using SalesWebMvc.Models.Enums;
 
 namespace SalesWebMvc.Services
 {
@@ -16,6 +17,22 @@ namespace SalesWebMvc.Services
         public SalesRecordService(SalesWebMvcContext context)
         {
             _context = context;
+        }
+
+        // implementing operation findAll to return all sellers from db
+        public async Task<List<SalesRecord>> FindAllAsync()
+        {
+            var saleStatus = Enum.GetNames(typeof(SaleStatus)).ToList();
+            var result = from obj in _context.SalesRecord select obj;
+
+            result = result.Where(obj => obj.Status == SaleStatus.Billed);
+
+            // get all sellers from db and convert to list (operation sync)
+            return await result
+                .Include(x => x.Seller) // sales record table join into the saller table
+                .Include(x => x.Seller.Departament) // sales record table join into the departament table
+                .OrderByDescending(x => x.Date) // orderning by date
+                .ToListAsync();
         }
 
         // method to insert a new sale into the db
@@ -66,6 +83,12 @@ namespace SalesWebMvc.Services
                 .OrderByDescending(x => x.Date) // orderning by date
                 .GroupBy(x => x.Seller.Departament) // when you GroupBy return wont be a List but a IGrouping
                 .ToListAsync();
+        }
+
+        // method to find a seller into the db
+        public async Task<SalesRecord> FindByIdAsync(int id)
+        {
+            return await _context.SalesRecord.Include(obj => obj.Seller).FirstOrDefaultAsync(obj => obj.Id == id);
         }
 
     }

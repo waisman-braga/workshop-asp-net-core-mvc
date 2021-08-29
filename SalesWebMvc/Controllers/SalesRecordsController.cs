@@ -22,9 +22,13 @@ namespace SalesWebMvc.Controllers
             _sellerService = sellerService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            // controller (SellersController) accessed the model (SellerService) to get data from list and send the data to the view (Seller/View/Index)
+            // implementing Index method, which call SellerService.FindAll
+            // return list of sellers and sending them to view
+            var list = await _salesRecordService.FindAllAsync();
+            return View(list);
         }
 
         public async Task<IActionResult> SimpleSearch(DateTime? minDate, DateTime? maxDate)
@@ -102,6 +106,38 @@ namespace SalesWebMvc.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // implementing edit action to open a window where the user can edit or go back to the seller index pg
+        public async Task<IActionResult> Edit(int? id)
+        {
+            // validate if the id is null, if its null means the request was improper so we return not found
+            if (id == null)
+            {
+                return RedirectToAction(nameof(Error), new { message = "Id not provided." });
+            }
 
+            // getting the obj we want to delete
+            // we need to put id.value bc the id is optional
+            // validate into the db if theres an obj with the id
+            var obj = await _salesRecordService.FindByIdAsync(id.Value);
+
+            // if the obj is null return not found
+            if (obj == null)
+            {
+                return RedirectToAction(nameof(Error), new { message = "Id not found." });
+            }
+
+            // openning the edit view 
+            // getting the departaments to populate the select box
+            // instacing the view model
+            List<Seller> sellers = await _sellerService.FindAllAsync();
+            SalesRecordFormViewModel viewModel = new SalesRecordFormViewModel { SalesRecord = obj, Sellers = sellers };
+
+            return View(viewModel);
+        }
+
+        private object Error()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
